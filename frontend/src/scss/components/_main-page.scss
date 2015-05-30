@@ -1,0 +1,63 @@
+.viewport {
+  @include pos(f, 0 0 0 0);
+  overflow: auto;
+  background-color: $viewport-bg;
+  text-align: center;
+  margin: 0 auto;
+
+  .content-column {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .spinner-container {
+    font-size: 50px;
+    color: $post-text-color;
+    @include pos(f, 0 0 0 0);
+    .fa {
+      vertical-align: middle;
+    }
+  }
+
+  .post {
+    margin-bottom: 10px;
+
+    img {
+      box-sizing: border-box;
+      max-width: 100%;
+      display: block;
+      cursor: pointer;
+    }
+
+    .img-clip {
+      img {
+        height: 100%;
+        max-width: none;
+      }
+    }
+
+    .post-text {
+      border-radius: 0 0 5px 5px;
+      background-color: $post-text-bg;
+      padding: $post-text-padding;
+      margin: 0;
+
+      max-height: 0;
+      color: rgba(0,0,0,0);
+      margin-top: -2 * $post-text-padding;
+
+      transition: max-height $transition-speed $transition-mode,
+                  color $transition-speed $transition-mode,
+                  margin $transition-speed $transition-mode;
+    }
+
+    &:hover {
+      .post-text {
+        max-height: 500px;
+        color: $post-text-color;
+        margin: 0;
+      }
+    }
+  }
+}
