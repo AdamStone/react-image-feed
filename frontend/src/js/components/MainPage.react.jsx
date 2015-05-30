@@ -1,6 +1,7 @@
 "use strict";
 
 var React = require('react'),
+    ImageView = require('./ImageView.react.jsx'),
     PostsAPI = require('../utils/PostsAPI'),
     getViewport = require('../utils/getViewport');
 
@@ -52,7 +53,13 @@ module.exports = React.createClass({
 
   onClick: function(e) {
     this.setState({
-      active: e.currentTarget
+      active: e.currentTarget.name
+    });
+  },
+
+  closeImageView: function() {
+    this.setState({
+      active: null
     });
   },
 
@@ -61,11 +68,14 @@ module.exports = React.createClass({
 
   render: function() {
     var posts = this.state.posts,
-        viewport = this.state.viewport;
+        viewport = this.state.viewport,
+        active = this.state.active;
+
 
     // initialize columns based on viewport width
 
-    var columns = [],
+    var imageView = null,
+        columns = [],
         fullWidth = Math.min(viewport.width, MAX_PAGE_WIDTH),
         numColumns = parseInt(
           (fullWidth - 2 * VIEWPORT_PADDING) / COLUMN_WIDTH
@@ -79,6 +89,7 @@ module.exports = React.createClass({
       });
     }
 
+
     // if posts not ready, set spinner
 
     var spinner = null;
@@ -91,16 +102,20 @@ module.exports = React.createClass({
       );
     }
 
+
     // if posts are ready ...
 
     else {
       posts.forEach(function(post) { // id, picture (url), text
+
+        // parse image url for dimensions
 
         var matched = post.picture.match(urlPattern),
             width = parseInt(matched[1]),
             height = parseInt(matched[2]),
             scaledWidth = IMG_WIDTH,
             scaledHeight = height * IMG_WIDTH/width;
+
 
         // find current shortest column to add post
 
@@ -114,24 +129,30 @@ module.exports = React.createClass({
           }
         });
 
+
         // if no clipping needed, add normal post
 
+        var img;
         if (scaledHeight >= IMG_MIN_HEIGHT) {
+
+          img = <img name={post.id}
+                     onClick={this.onClick}
+                     src={post.picture + '?nocache=' + post.id}/>;
 
           columns[shortestColumn].images.push(
             <div key={post.id}
                  className="post">
 
-              <img onClick={this.onClick}
-                   src={post.picture}/>
+              { img }
 
               <p className="post-text">
-                {post.text}
+                { post.text }
               </p>
 
             </div>
           );
         }
+
 
         // if clipping needed, wrap image in a clipping div
 
@@ -149,6 +170,11 @@ module.exports = React.createClass({
             marginLeft: '-' + (scaledWidth - IMG_WIDTH) / 2 + 'px'
           }
 
+          img = <img src={post.picture + '?nocache=' + post.id}
+                     name={post.id}
+                     onClick={this.onClick}
+                     style={imgStyle}/>;
+
           columns[shortestColumn].images.push(
             <div className="post"
                  key={post.id}>
@@ -156,26 +182,44 @@ module.exports = React.createClass({
               <div className="img-clip"
                    style={clipStyle}>
 
-                <img src={post.picture}
-                     onClick={this.onClick}
-                     style={imgStyle}/>
+                { img }
 
               </div>
               <p className="post-text">
-                {post.text}
+                { post.text }
               </p>
               </div>
           );
-
           scaledHeight = IMG_MIN_HEIGHT;
         }
+
 
         // update column height
 
         columns[shortestColumn].height += scaledHeight;
 
+
+        // if img is active, set ImageView
+
+        if (post.id == active) {
+
+          imageView = (
+            <ImageView viewport={viewport}
+                       portrait={height > width}
+                       close={this.closeImageView}>
+              { img }
+              <div>
+                <p className="post-text">
+                  { post.text }
+                </p>
+              </div>
+            </ImageView>
+          );
+        }
+
       }, this);
     }
+
 
     // build columns array
 
@@ -187,17 +231,25 @@ module.exports = React.createClass({
                style={{
                  width: COLUMN_WIDTH,
                  padding: COLUMN_PADDING}}>
-            {column.images}
+
+            { column.images }
+
           </div>
         );
       }
     );
 
+
     return (
       <div className="viewport"
            style={{padding: VIEWPORT_PADDING}}>
-        {contentColumns}
-        {spinner}
+
+        { contentColumns }
+
+        {/* conditional */}
+          { imageView }
+          { spinner }
+
       </div>
     );
   }
