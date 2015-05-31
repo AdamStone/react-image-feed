@@ -6,3 +6,7 @@ html, body {
 li {
   list-style: none;
 }
+
+img:-moz-loading {
+  visibility: hidden;
+}

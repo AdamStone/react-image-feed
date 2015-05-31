@@ -39,7 +39,7 @@
 
     .post-text {
       border-radius: 0 0 5px 5px;
-      background-color: $post-text-bg;
+      background-color: rgba(0,0,0,0);
       padding: $post-text-padding;
       margin: 0;
 
@@ -48,6 +48,7 @@
       margin-top: -2 * $post-text-padding;
 
       transition: max-height $transition-speed $transition-mode,
+                  background-color $transition-speed $transition-mode,
                   color $transition-speed $transition-mode,
                   margin $transition-speed $transition-mode;
     }
@@ -55,6 +56,7 @@
     &:hover {
       .post-text {
         max-height: 500px;
+        background-color: $post-text-bg;
         color: $post-text-color;
         margin: 0;
       }
