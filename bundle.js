@@ -391,8 +391,7 @@ module.exports = React.createClass({displayName: "exports",
     return (
       React.createElement("div", {className: "viewport", 
            onScroll: this.onScroll, 
-           style: {padding: VIEWPORT_PADDING,
-                   overflow: (active ? 'hidden' : 'auto')}}, 
+           style: {padding: VIEWPORT_PADDING}}, 
 
         contentColumns, 
 
