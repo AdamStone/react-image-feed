@@ -11,6 +11,7 @@ var urlPattern = /http:\/\/lorempixel.com\/(\d+)\/(\d+)/;
 // are needed for column count and image scaling
 var MAX_PAGE_WIDTH = 1080,
     IMG_WIDTH = 200,
+    IMG_MAX_HEIGHT = 600,
     SCROLLBAR_ADJUST = 20,  // should be >= max scrollbar width
     IMG_MIN_HEIGHT = 150,
     POST_PADDING = 5,
@@ -24,22 +25,48 @@ module.exports = React.createClass({
   getInitialState: function() {
     return {
       posts: [],
+      pending: false,
       viewport: {},
       active: null
     };
   },
 
+  getPosts: function() {
+    var self = this;
+
+    // if not pending already ...
+
+    if (!self.state.pending) {
+
+      // set pending true
+
+      self.setState({
+        pending: true
+      }, function() {
+
+        // then call API
+
+        PostsAPI.getPosts()
+          .then(function(posts) {
+
+            // add posts and set pending false
+
+            self.setState({
+              posts: self.state.posts.concat(posts),
+              pending: false
+            });
+          })
+          .done();
+
+      });
+
+    }
+  },
+
   componentDidMount: function() {
     window.addEventListener('resize', this.onResize);
     this.onResize();
-
-    var self = this;
-    PostsAPI.getPosts().then(function(posts) {
-      self.setState({
-        posts: posts
-      });
-    })
-    .done();
+    this.getPosts();
   },
 
   componentWillUnmount: function() {
@@ -58,6 +85,20 @@ module.exports = React.createClass({
     });
   },
 
+  onScroll: function(e) {
+
+    var scrollHeight = e.target.scrollHeight,
+        scrollTop = e.target.scrollTop,
+        clientHeight = e.target.clientHeight,
+        scrollBottom = scrollTop + clientHeight;
+
+    // get more posts if scrolled to bottom of image feed
+
+    if (scrollBottom > scrollHeight - IMG_MAX_HEIGHT && !this.state.active) {
+      this.getPosts();
+    }
+  },
+
   closeImageView: function() {
     this.setState({
       active: null
@@ -71,7 +112,6 @@ module.exports = React.createClass({
     var posts = this.state.posts,
         viewport = this.state.viewport,
         active = this.state.active;
-
 
     // initialize columns based on viewport width
 
@@ -108,7 +148,7 @@ module.exports = React.createClass({
     // if posts are ready ...
 
     else {
-      posts.forEach(function(post) { // id, picture (url), text
+      posts.forEach(function(post, index) { // id, picture (url), text
 
         // parse image url for dimensions
 
@@ -137,12 +177,12 @@ module.exports = React.createClass({
         var img;
         if (scaledHeight >= IMG_MIN_HEIGHT) {
 
-          img = <img name={post.id}
+          img = <img name={index}
                      onClick={this.onClick}
                      src={post.picture + '?nocache=' + post.id}/>;
 
           columns[shortestColumn].images.push(
-            <div key={post.id}
+            <div key={index}
                  className="post">
 
               { img }
@@ -173,13 +213,13 @@ module.exports = React.createClass({
           }
 
           img = <img src={post.picture + '?nocache=' + post.id}
-                     name={post.id}
+                     name={index}
                      onClick={this.onClick}
                      style={imgStyle}/>;
 
           columns[shortestColumn].images.push(
             <div className="post"
-                 key={post.id}>
+                 key={index}>
 
               <div className="img-clip"
                    style={clipStyle}>
@@ -203,7 +243,7 @@ module.exports = React.createClass({
 
         // if img is active, set ImageView
 
-        if (post.id == active) {
+        if (index == active) {
 
           imageView = (
             <ImageView viewport={viewport}
@@ -244,6 +284,7 @@ module.exports = React.createClass({
 
     return (
       <div className="viewport"
+           onScroll={this.onScroll}
            style={{padding: VIEWPORT_PADDING}}>
 
         { contentColumns }
