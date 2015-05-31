@@ -9,8 +9,9 @@ var urlPattern = /http:\/\/lorempixel.com\/(\d+)\/(\d+)/;
 
 // some layout styling is set here because the values
 // are needed for column count and image scaling
-var MAX_PAGE_WIDTH = 1060,
+var MAX_PAGE_WIDTH = 1080,
     IMG_WIDTH = 200,
+    SCROLLBAR_ADJUST = 20,  // should be >= max scrollbar width
     IMG_MIN_HEIGHT = 150,
     POST_PADDING = 5,
     VIEWPORT_PADDING = 5,
@@ -78,7 +79,8 @@ module.exports = React.createClass({
         columns = [],
         fullWidth = Math.min(viewport.width, MAX_PAGE_WIDTH),
         numColumns = parseInt(
-          (fullWidth - 2 * VIEWPORT_PADDING) / COLUMN_WIDTH
+          (fullWidth - 2 * VIEWPORT_PADDING -
+           SCROLLBAR_ADJUST) / COLUMN_WIDTH
         );
 
     for (var i=0; i < numColumns; i++) {
