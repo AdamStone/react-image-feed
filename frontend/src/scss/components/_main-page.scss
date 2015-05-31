@@ -21,7 +21,12 @@
   }
 
   .post {
+    background-color: initial;
     margin-bottom: 10px;
+    display: block;
+    outline: none;
+    padding: 0;
+    border: 0;
 
     img {
       box-sizing: border-box;
@@ -53,7 +58,7 @@
                   margin $transition-speed $transition-mode;
     }
 
-    &:hover {
+    &:hover, &:focus {
       .post-text {
         max-height: 500px;
         background-color: $post-text-bg;

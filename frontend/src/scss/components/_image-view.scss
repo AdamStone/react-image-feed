@@ -29,15 +29,21 @@
 
     .close-button {
       @include pos(a, 0 0 null null);
+      background-color: initial;
       font-size: 20px;
-      padding: 1em;
       cursor: pointer;
-      opacity: .1;
+      border: 0;
 
-      &:hover {
-        opacity: 1;
+      .fa {
+        opacity: .1;
+        padding: 1em;
       }
 
+      &:hover, &:focus {
+        .fa {
+          opacity: 1;
+        }
+      }
     }
   }
 }

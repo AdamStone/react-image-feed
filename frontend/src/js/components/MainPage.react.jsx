@@ -22,14 +22,27 @@ var MAX_PAGE_WIDTH = 1080,
 
 module.exports = React.createClass({
 
+  componentDidMount: function() {
+    window.addEventListener('resize', this.onResize);
+    this.onResize();
+    this.getPosts();
+  },
+
+
+  componentWillUnmount: function() {
+    window.removeEventListener('resize', this.onResize);
+  },
+
+
   getInitialState: function() {
     return {
-      posts: [],
-      pending: false,
-      viewport: {},
-      active: null
+      posts: [],       // post data from API
+      pending: false,  // API request pending
+      viewport: {},    // viewport dimensions
+      active: null     // active post index
     };
   },
+
 
   getPosts: function() {
     var self = this;
@@ -57,21 +70,10 @@ module.exports = React.createClass({
             });
           })
           .done();
-
       });
-
     }
   },
 
-  componentDidMount: function() {
-    window.addEventListener('resize', this.onResize);
-    this.onResize();
-    this.getPosts();
-  },
-
-  componentWillUnmount: function() {
-    window.removeEventListener('resize', this.onResize);
-  },
 
   onResize: function(){
     this.setState({
@@ -79,14 +81,20 @@ module.exports = React.createClass({
     });
   },
 
+
   onClick: function(e) {
     this.setState({
       active: e.currentTarget.name
     });
   },
 
-  onScroll: function(e) {
 
+  onHover: function(e) {
+    e.currentTarget.focus();
+  },
+
+
+  onScroll: function(e) {
     var scrollHeight = e.target.scrollHeight,
         scrollTop = e.target.scrollTop,
         clientHeight = e.target.clientHeight,
@@ -94,14 +102,25 @@ module.exports = React.createClass({
 
     // get more posts if scrolled to bottom of image feed
 
-    if (scrollBottom > scrollHeight - IMG_MAX_HEIGHT && !this.state.active) {
+    if (!this.state.active &&
+        scrollBottom > scrollHeight - IMG_MAX_HEIGHT) {
+
       this.getPosts();
     }
   },
 
+
   closeImageView: function() {
+    var wasActive = this.state.active;
+
+    // unset active state
     this.setState({
       active: null
+    },
+
+    // refocus
+    function() {
+      this.refs[wasActive].getDOMNode().focus();
     });
   },
 
@@ -172,27 +191,14 @@ module.exports = React.createClass({
         });
 
 
-        // if no clipping needed, add normal post
+        // if no clipping needed, use img as thumbnail
 
-        var img;
+        var img, thumbnail;
         if (scaledHeight >= IMG_MIN_HEIGHT) {
 
-          img = <img name={index}
-                     onClick={this.onClick}
-                     src={post.picture + '?nocache=' + post.id}/>;
+          img = <img src={post.picture + '?nocache=' + post.id}/>;
 
-          columns[shortestColumn].images.push(
-            <div key={index}
-                 className="post">
-
-              { img }
-
-              <p className="post-text">
-                { post.text }
-              </p>
-
-            </div>
-          );
+          thumbnail = img;
         }
 
 
@@ -208,32 +214,46 @@ module.exports = React.createClass({
             position: 'relative',
           };
 
-          var imgStyle = {
+          var imgStyle = {  // centering
             marginLeft: '-' + (scaledWidth - IMG_WIDTH) / 2 + 'px'
           }
 
           img = <img src={post.picture + '?nocache=' + post.id}
-                     name={index}
-                     onClick={this.onClick}
                      style={imgStyle}/>;
 
-          columns[shortestColumn].images.push(
-            <div className="post"
-                 key={index}>
+          thumbnail = (
+            <div className="img-clip"
+                 style={clipStyle}>
 
-              <div className="img-clip"
-                   style={clipStyle}>
+              { img }
 
-                { img }
-
-              </div>
-              <p className="post-text">
-                { post.text }
-              </p>
-              </div>
+            </div>
           );
+
           scaledHeight = IMG_MIN_HEIGHT;
         }
+
+
+        // build post element
+
+        columns[shortestColumn].images.push(
+          <button key={index}
+                  ref={index}
+                  name={index}
+                  tabIndex={active ? -1 : index}
+                  className="post"
+                  onClick={this.onClick}
+                  onMouseEnter={this.onHover}
+                  style={{maxWidth: IMG_WIDTH}}>
+
+            { thumbnail }
+
+            <p className="post-text">
+              { post.text }
+            </p>
+
+          </button>
+        );
 
 
         // update column height
@@ -249,12 +269,16 @@ module.exports = React.createClass({
             <ImageView viewport={viewport}
                        portrait={height > width}
                        close={this.closeImageView}>
+
               { img }
+
               <div>
-                <p className="post-text">
+                <p tabIndex="0"
+                   className="post-text">
                   { post.text }
                 </p>
               </div>
+
             </ImageView>
           );
         }
@@ -285,7 +309,8 @@ module.exports = React.createClass({
     return (
       <div className="viewport"
            onScroll={this.onScroll}
-           style={{padding: VIEWPORT_PADDING}}>
+           style={{padding: VIEWPORT_PADDING,
+                   overflow: (active ? 'hidden' : 'auto')}}>
 
         { contentColumns }
 

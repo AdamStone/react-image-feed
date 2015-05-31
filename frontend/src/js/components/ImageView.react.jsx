@@ -13,6 +13,9 @@ module.exports = React.createClass({
 
   componentDidMount: function() {
     document.addEventListener("keydown", this.handleKeyDown);
+
+    // focus invisible span to enable arrow key scrolling
+    this.refs.scrollFocus.getDOMNode().focus();
   },
 
 
@@ -41,8 +44,19 @@ module.exports = React.createClass({
 
         <div className="content-box">
 
-          <span className="fa fa-close close-button"
-                onClick={close}></span>
+          <span tabIndex="0"
+                ref="scrollFocus"
+                style={{border: '0',
+                        opacity: '0',
+                        outline: '0'}}></span>
+
+          <button title="close"
+                  onClick={close}
+                  className="close-button">
+
+            <span className="fa fa-close"></span>
+
+          </button>
 
           { this.props.children }
 
