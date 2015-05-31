@@ -309,8 +309,7 @@ module.exports = React.createClass({
     return (
       <div className="viewport"
            onScroll={this.onScroll}
-           style={{padding: VIEWPORT_PADDING,
-                   overflow: (active ? 'hidden' : 'auto')}}>
+           style={{padding: VIEWPORT_PADDING}}>
 
         { contentColumns }
 
