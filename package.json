@@ -1,9 +1,13 @@
 {
-  "name": "AppSheet-Exercise",
+  "name": "react-image-feed",
   "version": "1.0.0",
-  "description": "AppSheet Exercise",
+  "description": "A small React single-page app that displays a feed of random images and text.",
   "main": "./frontend/public/index.html",
   "author": "Adam Stone",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/AdamStone/react-image-feed.git"
+  },
   "dependencies": {
     "flux": "^2.0.3",
     "hapi": "^8.4.0",
