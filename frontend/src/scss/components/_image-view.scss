@@ -10,7 +10,7 @@
     border-radius: 10px;
     background-color: $viewport-bg;
     color: $post-text-color;
-    padding: 1.5em;
+    padding: 2em;
     max-width: $max-image-width;
     line-height: initial;
 
@@ -32,11 +32,12 @@
       background-color: initial;
       font-size: 20px;
       cursor: pointer;
+      padding: 0;
       border: 0;
 
       .fa {
-        opacity: .1;
-        padding: 1em;
+        opacity: .25;
+        padding: .5em;
       }
 
       &:hover, &:focus {

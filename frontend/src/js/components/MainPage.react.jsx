@@ -3,6 +3,7 @@
 var React = require('react'),
     ImageView = require('./ImageView.react.jsx'),
     PostsAPI = require('../utils/PostsAPI'),
+    getScrollbarWidth = require('../utils/getScrollbarWidth'),
     getViewport = require('../utils/getViewport');
 
 var urlPattern = /http:\/\/lorempixel.com\/(\d+)\/(\d+)/;
@@ -12,7 +13,6 @@ var urlPattern = /http:\/\/lorempixel.com\/(\d+)\/(\d+)/;
 var MAX_PAGE_WIDTH = 1080,
     IMG_WIDTH = 200,
     IMG_MAX_HEIGHT = 600,
-    SCROLLBAR_ADJUST = 20,  // should be >= max scrollbar width
     IMG_MIN_HEIGHT = 150,
     POST_PADDING = 5,
     VIEWPORT_PADDING = 5,
@@ -83,6 +83,9 @@ module.exports = React.createClass({
 
 
   onClick: function(e) {
+
+    // set active image for ImageView
+
     this.setState({
       active: e.currentTarget.name
     });
@@ -90,6 +93,17 @@ module.exports = React.createClass({
 
 
   onHover: function(e) {
+
+    // when mouse is in use, reset tabIndex focus
+
+    document.activeElement.blur();
+  },
+
+
+  onTouch: function(e) {
+
+    // mimic hover for touch screens
+
     e.currentTarget.focus();
   },
 
@@ -114,11 +128,13 @@ module.exports = React.createClass({
     var wasActive = this.state.active;
 
     // unset active state
+
     this.setState({
       active: null
     },
 
-    // refocus
+    // refocus for tabIndex
+
     function() {
       this.refs[wasActive].getDOMNode().focus();
     });
@@ -137,9 +153,10 @@ module.exports = React.createClass({
     var imageView = null,
         columns = [],
         fullWidth = Math.min(viewport.width, MAX_PAGE_WIDTH),
+        scrollbarWidth = getScrollbarWidth(),
         numColumns = parseInt(
           (fullWidth - 2 * VIEWPORT_PADDING -
-           SCROLLBAR_ADJUST) / COLUMN_WIDTH
+           scrollbarWidth) / COLUMN_WIDTH
         );
 
     for (var i=0; i < numColumns; i++) {
@@ -243,7 +260,8 @@ module.exports = React.createClass({
                   tabIndex={active ? -1 : index}
                   className="post"
                   onClick={this.onClick}
-                  onMouseEnter={this.onHover}
+                  onMouseMove={this.onHover}
+                  onTouchStart={this.onTouch}
                   style={{maxWidth: IMG_WIDTH}}>
 
             { thumbnail }
@@ -305,11 +323,23 @@ module.exports = React.createClass({
       }
     );
 
+    var viewportStyle = {
+      padding: VIEWPORT_PADDING,
+    }
+
+    // prevent viewport scroll if ImageView active
+    if (active) {
+      console.log(scrollbarWidth);
+      viewportStyle.overflow = 'hidden';
+      viewportStyle.paddingRight = (
+        VIEWPORT_PADDING + scrollbarWidth
+      );
+    }
 
     return (
       <div className="viewport"
            onScroll={this.onScroll}
-           style={{padding: VIEWPORT_PADDING}}>
+           style={viewportStyle}>
 
         { contentColumns }
 
