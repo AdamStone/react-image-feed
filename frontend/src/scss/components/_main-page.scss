@@ -52,10 +52,12 @@
       color: rgba(0,0,0,0);
       margin-top: -2 * $post-text-padding;
 
-      transition: max-height $transition-speed $transition-mode,
-                  background-color $transition-speed $transition-mode,
-                  color $transition-speed $transition-mode,
-                  margin $transition-speed $transition-mode;
+      transition: color $transition-speed $transition-mode $transition-delay,
+                 margin $transition-speed $transition-mode $transition-delay,
+             max-height $transition-speed $transition-mode $transition-delay,
+       background-color $transition-speed $transition-mode $transition-delay;
+
+                      ;
     }
 
     &:hover, &:focus {
